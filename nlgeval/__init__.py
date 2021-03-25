@@ -9,6 +9,7 @@ from nlgeval.pycocoevalcap.bleu.bleu import Bleu
 from nlgeval.pycocoevalcap.cider.cider import Cider
 from nlgeval.pycocoevalcap.meteor.meteor import Meteor
 from nlgeval.pycocoevalcap.rouge.rouge import Rouge
+import csv
 
 
 # str/unicode stripping in Python 2 and 3 instead of `str.strip`.
@@ -16,15 +17,30 @@ def _strip(s):
     return s.strip()
 
 
-def compute_metrics(hypothesis, references, no_overlap=False, no_skipthoughts=False, no_glove=False):
-    with open(hypothesis, 'r') as f:
-        hyp_list = f.readlines()
+def compute_metrics(hypothesis, no_overlap=False, no_skipthoughts=False, no_glove=False):
+    # with open(hypothesis, 'r') as f:
+    #     hyp_list = f.readlines()
+    # ref_list = []
+    # for iidx, reference in enumerate(references):
+    #     with open(reference, 'r') as f:
+    #         ref_list.append(f.readlines())
+
     ref_list = []
-    for iidx, reference in enumerate(references):
-        with open(reference, 'r') as f:
-            ref_list.append(f.readlines())
-    ref_list = [list(map(_strip, refs)) for refs in zip(*ref_list)]
+    hyp_list = []
+    with open(hypothesis, 'r') as f:
+      reader = csv.reader(f)
+      for row in reader:
+        hyp_list.append(row[0])
+        temp_ref = []
+        for i in range(len(row)):
+          if i > 0:
+            temp_ref.append(row[i])
+        ref_list.append(temp_ref)
+
+    
+    # ref_list = [list(map(_strip, refs)) for refs in zip(*ref_list)]
     refs = {idx: strippedlines for (idx, strippedlines) in enumerate(ref_list)}
+    print(refs)
     hyps = {idx: [lines.strip()] for (idx, lines) in enumerate(hyp_list)}
     assert len(refs) == len(hyps)
 
